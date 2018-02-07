@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>Early Learning Tool</title>
+        <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.5/lodash.min.js"></script>
+    </head>
+    <body>
+        <div>
+            <h1>Alphabet Match!</h1>
+            <div>
+                Pick a letter
+                <div id="letters"></div>
+            </div>
+            <div>
+                Pick an Object!
+                <div id="objects"></div>
+            </div>
+            <h2 id="display"></h2>
+            <button class='hidden' id='restart'>Restart</button>
+        </div>
+        <style>
+            .button {
+                width: 64px;
+                height: 64px;
+            }
+
+            .hidden {
+                visibility: hidden;
+            }
+        </style>
+        <script>
+            // Stores the data of each match
+            // Each array item is [<url of letter image>, <url of object image>]
+            const matches = [
+                ['https://cdn.pixabay.com/photo/2012/04/11/11/32/letter-a-27580_1280.png', 'http://juliandance.org/wp-content/uploads/2016/01/RedApple.jpg'],
+                ['https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/LetterB.svg/1200px-LetterB.svg.png', 'https://www.organicfacts.net/wp-content/uploads/2013/05/Banana3.jpg'],
+                ['https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Letter_c.svg/1200px-Letter_c.svg.png', 'https://s7d1.scene7.com/is/image/PETCO/cat-category-090617-369w-269h-hero-cutout-d?fmt=png-alpha'],
+                ['https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/Letter_d.svg/1200px-Letter_d.svg.png', 'https://s7d1.scene7.com/is/image/PETCO/dog-category-090617-369w-269h-hero-cutout-d?fmt=png-alpha'],
+                ['https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/LetterE.svg/1200px-LetterE.svg.png', 'http://www.nasa.gov/centers/goddard/images/content/638831main_globe_east_2048.jpg']
+            ];
+
+            const letters = document.getElementById('letters');
+            const objects = document.getElementById('objects');
+            const display = document.getElementById('display');
+            const restart = document.getElementById('restart');
+            restart.addEventListener('click', e => location.reload());
+
+            let selectedLetter = null;
+            let selectedObject = null;
+
+            let matchesLeft = matches.length;
+            const checkMatch = () => {
+                if (!selectedLetter || !selectedObject) {
+                    display.innerHTML = '';
+                    return;
+                }
+
+                if (selectedLetter.getAttribute('key') === selectedObject.getAttribute('key')) {
+                    selectedLetter.classList.add('hidden');
+                    selectedObject.classList.add('hidden');
+                    selectedLetter = null;
+                    selectedObject = null;
+                    display.innerHTML = 'Good Job!';
+                    matchesLeft--;
+                } else {
+                    display.innerHTML = 'Try again';
+                }
+
+                if (matchesLeft === 0) {
+                    display.innerHTML = 'Congratulations!';
+                    restart.classList.remove('hidden');
+                }
+            }
+
+            let objectElements = [];
+            matches.forEach((match, i) => {
+                const letter = document.createElement('img');
+                letter.setAttribute('src', match[0]);
+                letter.setAttribute('key', i);
+                letter.classList.add('button');
+                letter.addEventListener('click', e => {
+                    selectedLetter = e.target;
+                    checkMatch();
+                });
+                letters.appendChild(letter);
+
+                const object = document.createElement('img');
+                object.setAttribute('src', match[1]);
+                object.setAttribute('key', i);
+                object.classList.add('button');
+                object.addEventListener('click', e => {
+                    selectedObject = e.target;
+                    checkMatch();
+                });
+                objectElements.push(object);
+            });
+            objects.append(..._.shuffle(objectElements));
+        </script>
+    </body>
+</html>
