@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>Graphing calculator</title>
+    </head>
+    <body>
+        <div>
+            <div>
+                y = <input id="a" type="number" value="1" />x&#178; + <input id="b" type="number" value="0" />x + <input id="c" type="number" value="0" />
+                <button id="calculate">Calculate</button>
+            </div>
+            <div id="display">
+                <canvas id="graph" width="500" height="500"></canvas>
+                <canvas id="overlay" width="500" height="500"></canvas>
+            </div>
+            <div>
+                <button id='left'>Left</button>
+                <button id='up'>Up</button>
+                <button id='down'>Down</button>
+                <button id='right'>Right</button>
+                <button id='center'>Center</button>
+                <button id='autozoom'>Auto-Zoom</button>
+                <button id='zoomin'>Zoom In</button>
+                <button id='zoomout'>Zoom Out</button>
+                <button id='zoomreset'>Zoom Reset</button>
+            </div>
+        </div>
+
+        <style>
+            #display {
+                position: relative;
+            }
+
+            #graph {
+                border: 2px solid black;
+            }
+
+            #overlay {
+                margin: 2px;
+                position: absolute;
+                left: 0;
+                top: 0;
+                pointer-events: none;
+            }
+            
+            input {
+                width: 40px;
+            }
+        </style>
+        <script>
+            const canvas = document.getElementById('graph');
+            const ctx = canvas.getContext('2d');
+            const overlay = document.getElementById('overlay');
+            const ctxOverlay = overlay.getContext('2d');
+            const { width, height } = canvas;
+
+            class Point {
+                constructor(x, y) {
+                    this.x = x || 0;
+                    this.y = y || 0;
+                }
+            }
+
+            // Defines the location of the bottom left of the viewport
+            let viewport;
+            // Defines the size of the viewport in units
+            let viewportWidth;
+            const resetViewport = () => {
+                viewport = new Point(-10, -10);
+                viewportWidth = 20;
+            }
+            resetViewport();
+            
+            // Constants a, b, and c in the equation y=ax^2+bx+c 
+            const a = () => parseFloat(document.getElementById('a').value || '1');
+            const b = () => parseFloat(document.getElementById('b').value || '0');
+            const c = () => parseFloat(document.getElementById('c').value || '0');
+            // f(x) = ax^2 + bx + c
+            const f = (x) => a()*Math.pow(x, 2) + b()*x + c();
+
+            // Converts a position on the canvas to a position relative to the viewport
+            const canvasToViewportPoint = (point) => {
+                return new Point(
+                    point.x / width * viewportWidth + viewport.x, 
+                    (height - point.y) / height * viewportWidth + viewport.y
+                );
+            }
+
+            // Converts a position relative to the viewport to a position relative to the canvas
+            const viewportToCanvasPoint = (point) => {
+                return new Point(
+                    ((point.x - viewport.x) / viewportWidth) * width,
+                    height - (((point.y - viewport.y) / viewportWidth) * height)
+                );
+            }
+
+            // Plots the graph
+            const plot = () => {
+                ctx.clearRect(0, 0, width, height);
+
+                const canvasOrigin = viewportToCanvasPoint(new Point(0, 0));
+                ctx.strokeStyle = 'black';
+                // Draw the x axis
+                ctx.beginPath();
+                const xAxis = canvasOrigin.y;
+                ctx.moveTo(0, xAxis);
+                ctx.lineTo(width, xAxis);
+                ctx.stroke();
+                // Draw the y axis
+                ctx.beginPath();
+                const yAxis = canvasOrigin.x;
+                ctx.moveTo(yAxis, 0);
+                ctx.lineTo(yAxis, height);
+                ctx.stroke();
+
+                // For each x pixel in the target canvas
+                ctx.beginPath();
+                ctx.strokeStyle = 'red';
+                for (let canvasX = 0; canvasX <= width; canvasX++) {
+                    const viewportX = canvasToViewportPoint(new Point(canvasX, 0)).x;
+                    // Draws a line to canvas coordinates of f(viewportX)
+                    const canvasPoint = viewportToCanvasPoint(new Point(viewportX, f(viewportX)));
+                    ctx.lineTo(canvasPoint.x, canvasPoint.y);
+                }
+                ctx.stroke();
+            }
+            plot();
+
+            document.getElementById('calculate').addEventListener('click', () => plot());
+
+            document.getElementById('left').addEventListener('click', () => {
+                viewport = new Point(viewport.x - viewportWidth / 5, viewport.y);
+                plot();
+            });
+            document.getElementById('right').addEventListener('click', () => {
+                viewport = new Point(viewport.x + viewportWidth / 5, viewport.y);
+                plot();
+            });
+            document.getElementById('up').addEventListener('click', () => {
+                viewport = new Point(viewport.x, viewport.y + viewportWidth / 5);
+                plot();
+            });
+            document.getElementById('down').addEventListener('click', () => {
+                viewport = new Point(viewport.x, viewport.y - viewportWidth / 5);
+                plot();
+            });
+            document.getElementById('center').addEventListener('click', () => {
+                // Checks if line is not a parabola
+                if (a() === 0) {
+                    alert('Can\'t center as the line is not a parabola');
+                    return;
+                }
+
+                // Calculate the x position of the turning point
+                const tpX = (-b()) / (2*a());
+                // Shift the viewport so that it is centered on the TP
+                viewport = new Point(tpX - viewportWidth / 2, f(tpX) - viewportWidth / 2);
+                plot();
+            });
+            
+            document.getElementById('autozoom').addEventListener('click', () => {
+                // Finds the viewport where the function intersects the corners of the viewport
+                
+                // Checks if line is not a parabola
+                if (a() === 0) {
+                    alert('Can\'t auto-zoom as the line is not a parabola');
+                    return;
+                }
+
+                const TPx = (-b()) / (2*a());
+                const TP = new Point(TPx, f(TPx));
+                // With the viewport centered on the TP and a square viewport, the line y=x will intersect
+                // the function at the TP and one of the target corners of the viewport.
+                // The linear function y=x that passes through TP is y - TPy = m(x - TPx) -> y = x - TPx + TPy
+                // The following 2 lines solve x-TPx+TPy=ax^2+bx+c for x
+                const higherCornerX = (Math.sqrt((-4*a()*c()) - (4*a()*TP.x) + (4*a()*TP.y) + Math.pow(b(), 2) - (2*b()) + 1) - b() + 1) / (2*a());
+                const lowerCornerX = (-Math.sqrt((-4*a()*c()) - (4*a()*TP.x) + (4*a()*TP.y) + Math.pow(b(), 2) - (2*b()) + 1) - b() + 1) / (2*a());
+                // Finds the x distance between the TP and one of the corners found
+                const distance = Math.max(Math.abs(TP.x - higherCornerX), Math.abs(TP.x - lowerCornerX));
+                viewport = new Point(TP.x - distance, TP.y - distance);
+                viewportWidth = distance * 2;
+                plot();
+            });
+            document.getElementById('zoomin').addEventListener('click', () => {
+                // Get the current canvas centerpoint as viewport position
+                const viewportCenter = canvasToViewportPoint(new Point(width / 2, height / 2));
+                // Calculate new zoom level
+                viewportWidth = viewportWidth / 1.5;
+                // Adjust viewport origin so that centerpoint remains the same
+                viewport = new Point(viewportCenter.x - viewportWidth / 2, viewportCenter.y - viewportWidth / 2);
+                plot();
+            });
+            document.getElementById('zoomout').addEventListener('click', () => {
+                // Get the current canvas centerpoint as viewport position
+                const viewportCenter = canvasToViewportPoint(new Point(width / 2, height / 2));
+                // Calculate new zoom level
+                viewportWidth = viewportWidth * 1.5;
+                // Adjust viewport origin so that centerpoint remains the same
+                viewport = new Point(viewportCenter.x - viewportWidth / 2, viewportCenter.y - viewportWidth / 2);
+                plot();
+            });
+            document.getElementById('zoomreset').addEventListener('click', () => {
+                resetViewport();
+                plot();
+            });
+            
+            document.getElementById('graph').addEventListener('mousemove', (e) => {
+                // Get the point in the viewport where the cursor is located
+                const graphPoint = canvasToViewportPoint(new Point(e.clientX, e.clientY));
+                // Find the point where the x value intersects with the line
+                const linePoint = new Point(graphPoint.x, f(graphPoint.x));
+                // Calculate where the cursor x intersects with the line in canvas coordinates
+                const canvasLinePoint = viewportToCanvasPoint(linePoint);
+                // Draw a dotted blue line on the x position of the mouse
+                ctxOverlay.clearRect(0, 0, width, height);
+                ctxOverlay.strokeStyle = 'blue';
+                ctxOverlay.setLineDash([5, 5]);
+                ctxOverlay.beginPath();
+                ctxOverlay.moveTo(canvasLinePoint.x, 0);
+                ctxOverlay.lineTo(canvasLinePoint.x, height);
+                ctxOverlay.stroke();
+                // Draw a dot where the lines intersect
+                ctxOverlay.fillStyle = 'blue';
+                ctxOverlay.beginPath();
+                ctxOverlay.ellipse(canvasLinePoint.x, canvasLinePoint.y, 5, 5, 0, 0, 2 * Math.PI);
+                ctxOverlay.fill();
+                // Draw the coordinates of the dow
+                ctxOverlay.fillStyle = 'blue';
+                ctxOverlay.font = '20px sans-serif';
+                ctxOverlay.fillText(`(${linePoint.x.toFixed(2)}, ${linePoint.y.toFixed(2)})`, canvasLinePoint.x + 5, canvasLinePoint.y - 5);
+            });
+        </script>
+    </body>
+</html>
