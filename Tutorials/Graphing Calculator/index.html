@@ -126,6 +126,23 @@
                     ctx.lineTo(canvasPoint.x, canvasPoint.y);
                 }
                 ctx.stroke();
+
+                // Draw a label for the turning point
+                if (a() !== 0) {
+                    const TPx = (-b()) / (2*a());
+                    const TP = new Point(TPx, f(TPx));
+                    const canvasTP = viewportToCanvasPoint(TP);
+
+                    // Draw a dot at the TP
+                    ctx.fillStyle = 'red';
+                    ctx.beginPath();
+                    ctx.ellipse(canvasTP.x, canvasTP.y, 5, 5, 0, 0, 2 * Math.PI);
+                    ctx.fill();
+                    // Draw the coordinates of the dow
+                    ctx.fillStyle = 'red';
+                    ctx.font = '20px sans-serif';
+                    ctx.fillText(`(${TP.x.toFixed(2)}, ${TP.y.toFixed(2)})`, canvasTP.x + 5, canvasTP.y - 5);
+                }
             }
             plot();
 
