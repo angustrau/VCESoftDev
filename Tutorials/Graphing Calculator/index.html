@@ -97,6 +97,18 @@
                 );
             }
 
+            const drawLabel = (_ctx, text, point, style) => {
+                // Draw a dot
+                _ctx.fillStyle = style;
+                _ctx.beginPath();
+                _ctx.ellipse(point.x, point.y, 5, 5, 0, 0, 2 * Math.PI);
+                _ctx.fill();
+                // Draw the coordinates of the dow
+                _ctx.fillStyle = style;
+                _ctx.font = '20px sans-serif';
+                _ctx.fillText(text, point.x + 5, point.y - 5);
+            }
+
             // Plots the graph
             const plot = () => {
                 ctx.clearRect(0, 0, width, height);
@@ -131,18 +143,29 @@
                 if (a() !== 0) {
                     const TPx = (-b()) / (2*a());
                     const TP = new Point(TPx, f(TPx));
-                    const canvasTP = viewportToCanvasPoint(TP);
-
-                    // Draw a dot at the TP
-                    ctx.fillStyle = 'red';
-                    ctx.beginPath();
-                    ctx.ellipse(canvasTP.x, canvasTP.y, 5, 5, 0, 0, 2 * Math.PI);
-                    ctx.fill();
-                    // Draw the coordinates of the dow
-                    ctx.fillStyle = 'red';
-                    ctx.font = '20px sans-serif';
-                    ctx.fillText(`(${TP.x.toFixed(2)}, ${TP.y.toFixed(2)})`, canvasTP.x + 5, canvasTP.y - 5);
+                    drawLabel(ctx, `(${TP.x.toFixed(2)}, ${TP.y.toFixed(2)})`, viewportToCanvasPoint(TP), 'red');
                 }
+
+                // Draw the x intercepts
+                let xInts = [];
+                if (a() !== 0) {
+                    // Find the x intercepts for a parabola
+                    const lowerXInt = (-b() - Math.sqrt(Math.pow(b(), 2) - (4*a()*c()))) / (2*a());
+                    const higherXInt = (-b() + Math.sqrt(Math.pow(b(), 2) - (4*a()*c()))) / (2*a());
+                    if (Number.isFinite(lowerXInt)) xInts.push(lowerXInt);
+                    if (Number.isFinite(higherXInt)) xInts.push(higherXInt);
+                } else {
+                    // Find the x intercept for a linear
+                    if (b() !== 0) {
+                        xInts.push((-c()) / (b()));
+                    }
+                }
+                xInts.forEach((x) => {
+                    drawLabel(ctx, `(${x.toFixed(2)}, 0.00)`, viewportToCanvasPoint(new Point(x, 0)), 'red');
+                });
+
+                // Draw the y intercept
+                drawLabel(ctx, `(0.00, ${c().toFixed(2)})`, viewportToCanvasPoint(new Point(0, c())), 'red');
             }
             plot();
 
@@ -239,15 +262,8 @@
                 ctxOverlay.moveTo(canvasLinePoint.x, 0);
                 ctxOverlay.lineTo(canvasLinePoint.x, height);
                 ctxOverlay.stroke();
-                // Draw a dot where the lines intersect
-                ctxOverlay.fillStyle = 'blue';
-                ctxOverlay.beginPath();
-                ctxOverlay.ellipse(canvasLinePoint.x, canvasLinePoint.y, 5, 5, 0, 0, 2 * Math.PI);
-                ctxOverlay.fill();
-                // Draw the coordinates of the dow
-                ctxOverlay.fillStyle = 'blue';
-                ctxOverlay.font = '20px sans-serif';
-                ctxOverlay.fillText(`(${linePoint.x.toFixed(2)}, ${linePoint.y.toFixed(2)})`, canvasLinePoint.x + 5, canvasLinePoint.y - 5);
+                // Draw the label
+                drawLabel(ctxOverlay, `(${linePoint.x.toFixed(2)}, ${linePoint.y.toFixed(2)})`, canvasLinePoint, 'blue');
             });
         </script>
     </body>
