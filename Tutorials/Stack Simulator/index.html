@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>Stack Simulator</title>
+    </head>
+    <body>
+        <div id="stack">
+            <span id="stack0">$0.00</span>
+            <span id="stack1">$0.00</span>
+            <span id="stack2">$0.00</span>
+            <span id="stack3">$0.00</span>
+            <span id="stack4">$0.00</span>
+        </div>
+        <div id="coins">
+            <input value="0.05" type="radio" name="coin" />
+            <label for="0.05">5c</label>
+            <input value="0.1" type="radio" name="coin" />
+            <label for="0.1">10c</label>
+            <input value="0.2" type="radio" name="coin" />
+            <label for="0.2">20c</label>
+            <input value="0.5" type="radio" name="coin" />
+            <label for="0.5">50c</label>
+            <input value="1" type="radio" name="coin" />
+            <label for="1">$1.00</label>
+            <input value="2" type="radio" name="coin" />
+            <label for="2">$2.00</label>
+
+            <button id="push">Push</button>
+            <button id="pop">Pop</button>
+        </div>
+        <span>Top: <span id="top">0</span> Total: <span id="total">$0.00</span></span>
+
+        <style>
+            #stack * {
+                margin-right: 20px;
+            }
+
+            #coins label {
+                margin-right: 20px;
+            }
+        </style>
+        <script>
+            let stack = [];
+            let stackDisplay = [
+                document.getElementById('stack0'),
+                document.getElementById('stack1'),
+                document.getElementById('stack2'),
+                document.getElementById('stack3'),
+                document.getElementById('stack4')
+            ];
+            const topDisplay = document.getElementById('top');
+            const totalDisplay = document.getElementById('total');
+            
+            // The value of the selected coin
+            let selectedValue = 0;
+            // For each coin radio input
+            [].slice.call(document.getElementsByTagName('input')).forEach((input) => {
+                input.addEventListener('click', () => {
+                    selectedValue = parseFloat(input.getAttribute('value'));
+                });
+            });
+
+            const formatCurrency = (x) => {
+                return '$' + x.toFixed(2);
+            }
+
+            const updateStackDisplay = () => {
+                stackDisplay.forEach((display, i) => {
+                    display.innerText = formatCurrency(stack[i] || 0);
+                });
+
+                topDisplay.innerText = stack.length - 1;
+                totalDisplay.innerText = formatCurrency(stack.reduce((a, b) => a + b, 0));
+            }
+
+            document.getElementById('push').addEventListener('click', () => {
+                if (stack.length === 5) {
+                    alert('Stack is full. Pop to continue.');
+                    return;
+                }
+
+                stack.push(selectedValue);
+                updateStackDisplay();
+            });
+
+            document.getElementById('pop').addEventListener('click', () => {
+                if (stack.length === 0) {
+                    alert('Stack is empty. Push to continue.');
+                    return;
+                }
+
+                stack.pop();
+                updateStackDisplay();
+            });
+        </script>
+    </body>
+</html>
