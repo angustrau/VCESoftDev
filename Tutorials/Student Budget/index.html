@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>Student Budget Calculator</title>
+    </head>
+    <body>
+        <div>
+            <div>
+                <h1>Income</h1>
+                <div id="income"></div>
+                <input type="text" id="income-add-text" /><button id="income-add-button">Add</button>
+            </div>
+            <div>
+                <h1>Expenses</h1>
+                <div id="expenses"></div>
+                <input type="text" id="expense-add-text" /><button id="expense-add-button">Add</button>
+            </div>
+            <div>
+                <h1>Summary</h1>
+                <div>
+                    <p>Annual Saving: <span id="savings">$0.00</span></p>
+                    <button id="calculate">Calculate</button>
+                </div>
+            </div>
+        </div>
+
+        <style>
+            .input-row {
+                margin: 10px 0 10px 0;
+            }
+
+            .input-checkbox {
+                float: left;
+            }
+
+            .input-label {
+                float: left;
+                width: 150px;
+
+            }
+        </style>
+        <script>
+            const createSelectOption = (label, value) => {
+                const option = document.createElement('option');
+                option.setAttribute('value', value);
+                option.innerText = label;
+                return option;
+            }
+
+            const createInput = (name) => {
+                const element = document.createElement('div');
+                element.classList.add('input-row');
+                
+                const checkbox = document.createElement('input');
+                checkbox.classList.add('input-checkbox');
+                checkbox.setAttribute('type', 'checkbox');
+                checkbox.setAttribute('checked', 'true');
+                element.appendChild(checkbox);
+
+                const label = document.createElement('span');
+                label.classList.add('input-label');
+                label.innerText = name;
+                element.appendChild(label);
+
+                const amount = document.createElement('input');
+                amount.classList.add('input-amount')
+                amount.setAttribute('type', 'number');
+                amount.setAttribute('value', '0.00');
+                amount.setAttribute('step', '0.10');
+                amount.setAttribute('min', '0');
+                element.appendChild(amount);
+
+                const timePeriod = document.createElement('select');
+                timePeriod.classList.add('input-timeperiod');
+                timePeriod.appendChild(createSelectOption('Daily', 'daily'));
+                const timePeriodWeekly = createSelectOption('Weekly', 'weekly');
+                timePeriodWeekly.setAttribute('selected', 'true');
+                timePeriod.appendChild(timePeriodWeekly);
+                timePeriod.appendChild(createSelectOption('Monthly', 'monthly'));
+                timePeriod.appendChild(createSelectOption('Annually', 'annually'));
+                element.appendChild(timePeriod);
+
+                const deleteButton = document.createElement('button');
+                deleteButton.classList.add('input-delete');
+                deleteButton.innerText = 'Delete';
+                deleteButton.addEventListener('click', () => {
+                    element.remove();
+                });
+                element.appendChild(deleteButton);
+
+                return element;
+            }
+            
+            const createIncomeInput = (name) => {
+                const element = createInput(name);
+                element.classList.add('income-input');
+                return element;
+            }
+            const income = document.getElementById('income');
+            income.appendChild(createIncomeInput('Allowance'));
+            income.appendChild(createIncomeInput('Job'));
+            income.appendChild(createIncomeInput('Other'));
+            document.getElementById('income-add-button').addEventListener('click', () => {
+                income.appendChild(createIncomeInput(document.getElementById('income-add-text').value));
+            });
+            
+            const createExpensesInput = (name) => {
+                const element = createInput(name);
+                element.classList.add('expenses-input');
+                return element;
+            }
+            const expenses = document.getElementById('expenses');
+            expenses.appendChild(createExpensesInput('School'));
+            expenses.appendChild(createExpensesInput('Travel'));
+            expenses.appendChild(createExpensesInput('Other'));
+            document.getElementById('expense-add-button').addEventListener('click', () => {
+                expenses.appendChild(createExpensesInput(document.getElementById('expense-add-text').value));
+            });
+            
+            const processTotal = (inputs) => {
+                return Array.from(inputs)
+                .map((inputDiv) => {
+                    const checkbox = Array.from(inputDiv.childNodes).find(child => child.classList.contains('input-checkbox')).checked;
+                    const amount = parseFloat(Array.from(inputDiv.childNodes).find(child => child.classList.contains('input-amount')).value);
+                    const timePeriod = Array.from(inputDiv.childNodes).find(child => child.classList.contains('input-timeperiod')).value;
+
+                    if (!checkbox) return 0;
+
+                    switch(timePeriod) {
+                        case 'daily':
+                            return amount * 365;
+                            break;
+                        case 'weekly':
+                            return amount * 52;
+                            break;
+                        case 'monthly':
+                            return amount * 12;
+                            break;
+                        case 'annually':
+                            return amount;
+                            break;
+                        default:
+                            return 0;
+                            break;
+                    }
+                })
+                .reduce((a, b) => a + b, 0);
+            }
+            const savingsDisplay = document.getElementById('savings');
+            document.getElementById('calculate').addEventListener('click', () => {
+                const income = processTotal(document.getElementsByClassName('income-input'));
+                const expenses = processTotal(document.getElementsByClassName('expenses-input'));
+                savingsDisplay.innerText = '$' + (income - expenses).toFixed(2).toString();
+            });
+        </script>
+    </body>
+</html>
