@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>Suburbs and Postcodes</title>
+    </head>
+    <body>
+        <div id="root">
+            <div>
+                <select id="suburb-list" size="50"></select>
+            </div>
+            <div>
+                <div>
+                    Suburb: <input type="text" id="suburb-input" />
+                    Postcode: <input type="text" id="postcode-input" />
+                    <button id="add-button">Add</button>
+                    <button id="edit-button">Edit</button>
+                    <button id="delete-button">Delete</button>
+                </div>
+                <div>
+                    Suburb: <input type="text" id="search-input" />
+                    <button id="search-button">Search</button>
+                </div>
+            </div>
+        </div>
+
+        <style>
+            #root>div {
+                float: left;
+            }
+
+            #suburb-list {
+                width: 150px;
+            }
+        </style>
+        <script>
+            let suburbs = JSON.parse(localStorage.getItem('suburbs') || '[]');
+            const saveSuburbs = () => localStorage.setItem('suburbs', JSON.stringify(suburbs));
+            const addSuburb = (suburb, postcode) => {
+                suburbs.push({ suburb, postcode });
+                saveSuburbs();
+                displaySuburbList();
+            }
+            const removeSuburb = (suburb) => {
+                suburbs = suburbs.filter(x => x.suburb !== suburb);
+                saveSuburbs();
+                displaySuburbList();
+            }
+            const editSuburb = (suburb, postcode) => {
+                suburbs = suburbs.map((x) => {
+                    if (x.suburb === suburb) {
+                        return { suburb, postcode };
+                    }
+
+                    return x;
+                });
+                saveSuburbs();
+                displaySuburbList();
+            }
+            const searchSuburb = (suburb) => {
+                return suburbs.find(x => x.suburb === suburb).postcode;
+            }
+            
+            const suburbDisplay = document.getElementById('suburb-list');
+            const suburbInput = document.getElementById('suburb-input');
+            const postcodeInput = document.getElementById('postcode-input');
+            const displaySuburbList = () => {
+                suburbDisplay.innerHTML = '';
+                suburbs.forEach(({ suburb, postcode }) => {
+                    const element = document.createElement('option');
+                    element.setAttribute('value', suburb);
+                    element.innerText = suburb + ' ' + postcode;
+                    element.addEventListener('click', () => {
+                        suburbInput.value = suburb;
+                        postcodeInput.value = postcode;
+                    });
+                    suburbDisplay.appendChild(element);
+                });
+            }
+            displaySuburbList();
+            const getSelectedSuburb = () => {
+                return Array.from(suburbDisplay.childNodes).find(suburb => suburb.selected);
+            }
+            const doesSuburbExist = (suburb) => {
+                return Array.from(suburbDisplay.childNodes).find(x => x.value === suburb) !== undefined;
+            }
+            
+            document.getElementById('add-button').addEventListener('click', () => {
+                if (suburbInput.value === '' || postcodeInput === '') {
+                    alert('Please enter a suburb and postcode');
+                    return;
+                }
+
+                if (doesSuburbExist(suburbInput.value)) {
+                    alert('Suburb already exists in database');
+                    return;
+                }
+
+                addSuburb(suburbInput.value, postcodeInput.value);
+            });
+
+            document.getElementById('edit-button').addEventListener('click', () => {
+                if (!doesSuburbExist(suburbInput.value)) {
+                    alert('Suburb does not exist in database');
+                    return;
+                }
+
+                editSuburb(suburbInput.value, postcodeInput.value);
+            });
+
+            document.getElementById('delete-button').addEventListener('click', () => {
+                if (!doesSuburbExist(suburbInput.value)) {
+                    alert('Suburb does not exist in database');
+                    return;
+                }
+
+                removeSuburb(suburbInput.value);
+            });
+
+            const searchInput = document.getElementById('search-input');
+            document.getElementById('search-button').addEventListener('click', () => {
+                if (!doesSuburbExist(suburbInput.value)) {
+                    alert('Suburb does not exist in database');
+                    return;
+                }
+
+                alert('Postcode: ' + searchSuburb(suburbInput.value));
+            });
+        </script>
+    </body>
+</html>

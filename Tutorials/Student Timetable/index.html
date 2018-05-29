@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>Student Timetable</title>
+    </head>
+    <body>
+        <style>
+            #timetable {
+                display: flex;
+                width: 100%;
+            }
+
+            .day {
+                flex: 1;
+            }
+
+            .eventlist {
+                display: flex;
+                flex-direction: column;
+            }
+        </style>
+
+        <div id="timetable">
+            <div class="day">
+                <h1>Monday</h1>
+                <div class="eventlist">
+
+                </div>
+            </div>
+            <div class="day">
+                <h1>Tuesday</h1>
+                <div class="eventlist">
+                    
+                </div>
+            </div>
+            <div class="day">
+                <h1>Wednesday</h1>
+                <div class="eventlist">
+                    
+                </div>
+            </div>
+            <div class="day">
+                <h1>Thursday</h1>
+                <div class="eventlist">
+                    
+                </div>
+            </div>
+            <div class="day">
+                <h1>Friday</h1>
+                <div class="eventlist">
+                    
+                </div>
+            </div>
+        </div>
+
+        <script>
+            const periods = [
+                'P1',
+                'P2',
+                'P3',
+                'Recess',
+                'P4',
+                'P5',
+                'Lunch',
+                'P6',
+                'P7'
+            ];
+
+            const data = JSON.parse(localStorage.getItem('studenttimetable-data')) || [];
+            const eventLists = Array.from(document.getElementById('timetable').children).map(x => x.children[1]);
+
+            eventLists.forEach((eventList, dayIndex) => {
+                if (!data[dayIndex]) {
+                    data[dayIndex] = new Array(periods.length).fill('');
+                }
+
+                periods.forEach((period, periodIndex) => {
+                    const button = document.createElement('button');
+                    button.innerText = period + ': ' + data[dayIndex][periodIndex];
+                    button.addEventListener('click', () => {
+                        data[dayIndex][periodIndex] = prompt('Enter event name:', '');
+                        localStorage.setItem('studenttimetable-data', JSON.stringify(data));
+                        
+                        button.innerText = period + ': ' + data[dayIndex][periodIndex];
+                    });
+
+                    eventList.appendChild(button);
+                });
+            });
+        </script>
+    </body>
+</html>
