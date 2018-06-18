@@ -37,7 +37,14 @@
         </style>
         <script>
             let suburbs = JSON.parse(localStorage.getItem('suburbs') || '[]');
-            const saveSuburbs = () => localStorage.setItem('suburbs', JSON.stringify(suburbs));
+            const saveSuburbs = () => {
+                const sort = (a, b) => {
+                    return a.postcode - b.postcode;
+                }
+                
+                suburbs.sort(sort);
+                localStorage.setItem('suburbs', JSON.stringify(suburbs))
+            };
             const addSuburb = (suburb, postcode) => {
                 suburbs.push({ suburb, postcode });
                 saveSuburbs();
