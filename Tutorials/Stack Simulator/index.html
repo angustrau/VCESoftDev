@@ -7,13 +7,7 @@
         <title>Stack Simulator</title>
     </head>
     <body>
-        <div id="stack">
-            <span id="stack0">$0.00</span>
-            <span id="stack1">$0.00</span>
-            <span id="stack2">$0.00</span>
-            <span id="stack3">$0.00</span>
-            <span id="stack4">$0.00</span>
-        </div>
+        <div id="stack"></div>
         <div id="coins">
             <input value="0.05" type="radio" name="coin" />
             <label for="0.05">5c</label>
@@ -43,14 +37,18 @@
             }
         </style>
         <script>
+            let stackLength = 10;
+
+            let stackDisplayContainer = document.getElementById('stack');
+            let stackDisplay = [];
+            for (let i = 0; i <= stackLength; i++) {
+                var stackItem = document.createElement('span');
+                stackItem.innerText = '$0.00';
+                stackDisplayContainer.appendChild(stackItem);
+                stackDisplay.push(stackItem);
+            }
+
             let stack = [];
-            let stackDisplay = [
-                document.getElementById('stack0'),
-                document.getElementById('stack1'),
-                document.getElementById('stack2'),
-                document.getElementById('stack3'),
-                document.getElementById('stack4')
-            ];
             const topDisplay = document.getElementById('top');
             const totalDisplay = document.getElementById('total');
             
@@ -72,12 +70,12 @@
                     display.innerText = formatCurrency(stack[i] || 0);
                 });
 
-                topDisplay.innerText = stack.length - 1;
+                topDisplay.innerText = Math.max(stack.length - 1, 0);
                 totalDisplay.innerText = formatCurrency(stack.reduce((a, b) => a + b, 0));
             }
 
             document.getElementById('push').addEventListener('click', () => {
-                if (stack.length === 5) {
+                if (stack.length === stackLength - 1) {
                     alert('Stack is full. Pop to continue.');
                     return;
                 }
