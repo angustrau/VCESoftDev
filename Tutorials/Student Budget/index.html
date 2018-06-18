@@ -36,10 +36,9 @@
                 float: left;
             }
 
-            .input-label {
+            .input-label, .input-renamebox {
                 float: left;
                 width: 150px;
-
             }
         </style>
         <script>
@@ -82,6 +81,25 @@
                 timePeriod.appendChild(createSelectOption('Monthly', 'monthly'));
                 timePeriod.appendChild(createSelectOption('Annually', 'annually'));
                 element.appendChild(timePeriod);
+
+                const renameButton = document.createElement('button');
+                renameButton.classList.add('input-rename');
+                renameButton.innerText = 'Rename';
+                const renameBox = document.createElement('input');
+                renameBox.classList.add('input-renamebox');
+                renameBox.setAttribute('type', 'text');
+                renameButton.addEventListener('click', () => {
+                    if (renameButton.innerText === 'Rename') {
+                        renameBox.setAttribute('value', label.innerText);
+                        label.innerHTML = '';
+                        label.appendChild(renameBox);
+                        renameButton.innerText = 'Save';
+                    } else {
+                        label.innerText = renameBox.value;
+                        renameButton.innerText = 'Rename';
+                    }
+                });
+                element.appendChild(renameButton);
 
                 const deleteButton = document.createElement('button');
                 deleteButton.classList.add('input-delete');
