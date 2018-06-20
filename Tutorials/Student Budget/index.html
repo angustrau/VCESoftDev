@@ -42,10 +42,15 @@
             }
         </style>
         <script>
-            const createSelectOption = (label, value) => {
+            const createSelectOption = (label, value, selected) => {
                 const option = document.createElement('option');
                 option.setAttribute('value', value);
                 option.innerText = label;
+
+                if (selected) {
+                    option.setAttribute('selected', 'true');
+                }
+
                 return option;
             }
 
@@ -75,9 +80,7 @@
                 const timePeriod = document.createElement('select');
                 timePeriod.classList.add('input-timeperiod');
                 timePeriod.appendChild(createSelectOption('Daily', 'daily'));
-                const timePeriodWeekly = createSelectOption('Weekly', 'weekly');
-                timePeriodWeekly.setAttribute('selected', 'true');
-                timePeriod.appendChild(timePeriodWeekly);
+                timePeriod.appendChild(createSelectOption('Weekly', 'weekly', true));
                 timePeriod.appendChild(createSelectOption('Monthly', 'monthly'));
                 timePeriod.appendChild(createSelectOption('Annually', 'annually'));
                 element.appendChild(timePeriod);
@@ -112,39 +115,41 @@
                 return element;
             }
             
+            const income = document.getElementById('income');
             const createIncomeInput = (name) => {
                 const element = createInput(name);
                 element.classList.add('income-input');
-                return element;
+                income.appendChild(element);
             }
-            const income = document.getElementById('income');
-            income.appendChild(createIncomeInput('Allowance'));
-            income.appendChild(createIncomeInput('Job'));
-            income.appendChild(createIncomeInput('Other'));
+            createIncomeInput('Allowance');
+            createIncomeInput('Job');
+            createIncomeInput('Other');
             document.getElementById('income-add-button').addEventListener('click', () => {
-                income.appendChild(createIncomeInput(document.getElementById('income-add-text').value));
+                createIncomeInput(document.getElementById('income-add-text').value);
             });
             
+            const expenses = document.getElementById('expenses');
             const createExpensesInput = (name) => {
                 const element = createInput(name);
                 element.classList.add('expenses-input');
-                return element;
+                expenses.appendChild(element);
             }
-            const expenses = document.getElementById('expenses');
-            expenses.appendChild(createExpensesInput('School'));
-            expenses.appendChild(createExpensesInput('Travel'));
-            expenses.appendChild(createExpensesInput('Other'));
+            createExpensesInput('School');
+            createExpensesInput('Travel');
+            createExpensesInput('Other');
             document.getElementById('expense-add-button').addEventListener('click', () => {
-                expenses.appendChild(createExpensesInput(document.getElementById('expense-add-text').value));
+                createExpensesInput(document.getElementById('expense-add-text').value);
             });
             
             const processTotal = (inputs) => {
                 return Array.from(inputs)
                 .map((inputDiv) => {
-                    const checkbox = Array.from(inputDiv.childNodes).find(child => child.classList.contains('input-checkbox')).checked;
-                    const amount = parseFloat(Array.from(inputDiv.childNodes).find(child => child.classList.contains('input-amount')).value);
-                    const timePeriod = Array.from(inputDiv.childNodes).find(child => child.classList.contains('input-timeperiod')).value;
-
+                    // Map each input to a numerical value
+                    const checkbox = Array.from(inputDiv.children).find(child => child.classList.contains('input-checkbox')).checked;
+                    const amount = parseFloat(Array.from(inputDiv.children).find(child => child.classList.contains('input-amount')).value);
+                    const timePeriod = Array.from(inputDiv.children).find(child => child.classList.contains('input-timeperiod')).value;
+                    
+                    // Check if the input is disabled
                     if (!checkbox) return 0;
 
                     switch(timePeriod) {
@@ -165,6 +170,7 @@
                             break;
                     }
                 })
+                // Sum all the inputs to a total
                 .reduce((a, b) => a + b, 0);
             }
             const savingsDisplay = document.getElementById('savings');

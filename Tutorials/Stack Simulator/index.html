@@ -7,29 +7,32 @@
         <title>Stack Simulator</title>
     </head>
     <body>
-        <div id="stack"></div>
-        <div id="coins">
-            <input value="0.05" type="radio" name="coin" />
-            <label for="0.05">5c</label>
-            <input value="0.1" type="radio" name="coin" />
-            <label for="0.1">10c</label>
-            <input value="0.2" type="radio" name="coin" />
-            <label for="0.2">20c</label>
-            <input value="0.5" type="radio" name="coin" />
-            <label for="0.5">50c</label>
-            <input value="1" type="radio" name="coin" />
-            <label for="1">$1.00</label>
-            <input value="2" type="radio" name="coin" />
-            <label for="2">$2.00</label>
-
-            <button id="push">Push</button>
-            <button id="pop">Pop</button>
+        <div id="container">
+            <div id="stack"></div>
+            <div id="controls">
+                <div id="coins"></div>
+                <button id="push">Push</button>
+                <button id="pop">Pop</button>
+                <div>Top: <span id="top">0</span> Total: <span id="total">$0.00</span></div>
+            </div>
         </div>
-        <span>Top: <span id="top">0</span> Total: <span id="total">$0.00</span></span>
 
         <style>
+            #container {
+                display: flex;
+            }
+
+            #stack {
+                display: flex;
+                flex-direction: column-reverse;
+            }
+
             #stack * {
                 margin-right: 20px;
+            }
+
+            #controls {
+                flex: 1;
             }
 
             #coins label {
@@ -38,10 +41,18 @@
         </style>
         <script>
             let stackLength = 10;
+            let coins = [
+                ['5c', 0.05],
+                ['10c', 0.1],
+                ['20c', 0.2],
+                ['50c', 0.5],
+                ['$1', 1],
+                ['$2', 2]
+            ]
 
             let stackDisplayContainer = document.getElementById('stack');
             let stackDisplay = [];
-            for (let i = 0; i <= stackLength; i++) {
+            for (let i = 0; i < stackLength; i++) {
                 var stackItem = document.createElement('span');
                 stackItem.innerText = '$0.00';
                 stackDisplayContainer.appendChild(stackItem);
@@ -54,29 +65,45 @@
             
             // The value of the selected coin
             let selectedValue = 0;
-            // For each coin radio input
-            [].slice.call(document.getElementsByTagName('input')).forEach((input) => {
+            // Generate the coin selection display
+            let coinsContainer = document.getElementById('coins');
+            coins.forEach(([text, value]) => {
+                // Create a radio button for the coin
+                let input = document.createElement('input');
+                input.setAttribute('name', 'coin');
+                input.setAttribute('type', 'radio');
+                input.setAttribute('value', value);
                 input.addEventListener('click', () => {
                     selectedValue = parseFloat(input.getAttribute('value'));
                 });
+                coinsContainer.appendChild(input);
+                
+                // Create a label for the coin
+                let label = document.createElement('label');
+                label.setAttribute('for', value);
+                label.innerText = text;
+                coinsContainer.appendChild(label);
             });
 
-            const formatCurrency = (x) => {
-                return '$' + x.toFixed(2);
-            }
+            const formatCurrency = x => '$' + x.toFixed(2);
 
             const updateStackDisplay = () => {
                 stackDisplay.forEach((display, i) => {
                     display.innerText = formatCurrency(stack[i] || 0);
                 });
 
-                topDisplay.innerText = Math.max(stack.length - 1, 0);
+                topDisplay.innerText = stack.length;
                 totalDisplay.innerText = formatCurrency(stack.reduce((a, b) => a + b, 0));
             }
 
             document.getElementById('push').addEventListener('click', () => {
-                if (stack.length === stackLength - 1) {
+                if (stack.length === stackLength) {
                     alert('Stack is full. Pop to continue.');
+                    return;
+                }
+
+                if (selectedValue === 0) {
+                    alert('Please select a value.');
                     return;
                 }
 

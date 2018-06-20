@@ -194,10 +194,11 @@
                     return;
                 }
 
-                // Calculate the x position of the turning point
+                // Calculate the position of the turning point
                 const tpX = (-b()) / (2*a());
+                const tpY = f(tpX)
                 // Shift the viewport so that it is centered on the TP
-                viewport = new Point(tpX - viewportWidth / 2, f(tpX) - viewportWidth / 2);
+                viewport = new Point(tpX - viewportWidth / 2, tpY - viewportWidth / 2);
                 plot();
             });
             

@@ -23,40 +23,17 @@
             }
         </style>
 
-        <div id="timetable">
-            <div class="day">
-                <h1>Monday</h1>
-                <div class="eventlist">
-
-                </div>
-            </div>
-            <div class="day">
-                <h1>Tuesday</h1>
-                <div class="eventlist">
-                    
-                </div>
-            </div>
-            <div class="day">
-                <h1>Wednesday</h1>
-                <div class="eventlist">
-                    
-                </div>
-            </div>
-            <div class="day">
-                <h1>Thursday</h1>
-                <div class="eventlist">
-                    
-                </div>
-            </div>
-            <div class="day">
-                <h1>Friday</h1>
-                <div class="eventlist">
-                    
-                </div>
-            </div>
-        </div>
+        <div id="timetable"></div>
 
         <script>
+            const days = [
+                'Monday',
+                'Tuesday',
+                'Wednesday',
+                'Thursday',
+                'Friday'
+            ]
+
             const periods = [
                 'P1',
                 'P2',
@@ -70,17 +47,36 @@
             ];
 
             const data = JSON.parse(localStorage.getItem('studenttimetable-data')) || [];
-            const eventLists = Array.from(document.getElementById('timetable').children).map(x => x.children[1]);
-
-            eventLists.forEach((eventList, dayIndex) => {
+            
+            const timetable = document.getElementById('timetable');
+            days.forEach((day, dayIndex) => {
+                // Generate a column for each day
+                const container = document.createElement('div');
+                container.classList.add('day');
+                
+                // Add a heading to the column with the day as text
+                const heading = document.createElement('h1');
+                heading.innerText = day;
+                container.appendChild(heading);
+                
+                // Create a container to store periods
+                const eventList = document.createElement('div');
+                eventList.classList.add('eventlist');
+                container.appendChild(eventList);
+                
+                // If data for this day doesn't exist, create the defaults
                 if (!data[dayIndex]) {
                     data[dayIndex] = new Array(periods.length).fill('');
                 }
-
+                
                 periods.forEach((period, periodIndex) => {
+                    // Generate a cell for each period
                     const button = document.createElement('button');
+                    // Set the text to the period data
                     button.innerText = period + ': ' + data[dayIndex][periodIndex];
                     button.addEventListener('click', () => {
+                        // When the period button is clicked
+                        // Update the period data
                         data[dayIndex][periodIndex] = prompt('Enter event name:', '');
                         localStorage.setItem('studenttimetable-data', JSON.stringify(data));
                         
@@ -89,6 +85,8 @@
 
                     eventList.appendChild(button);
                 });
+
+                timetable.appendChild(container);
             });
         </script>
     </body>

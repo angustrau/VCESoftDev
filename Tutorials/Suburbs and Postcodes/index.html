@@ -27,8 +27,8 @@
         </div>
 
         <style>
-            #root>div {
-                float: left;
+            #root {
+                display: flex;
             }
 
             #suburb-list {
@@ -38,11 +38,12 @@
         <script>
             let suburbs = JSON.parse(localStorage.getItem('suburbs') || '[]');
             const saveSuburbs = () => {
-                const sort = (a, b) => {
+                // Sort the suburbs list by postcode
+                const comparator = (a, b) => {
                     return a.postcode - b.postcode;
                 }
+                suburbs.sort(comparator);
                 
-                suburbs.sort(sort);
                 localStorage.setItem('suburbs', JSON.stringify(suburbs))
             };
             const addSuburb = (suburb, postcode) => {
@@ -56,6 +57,7 @@
                 displaySuburbList();
             }
             const editSuburb = (suburb, postcode) => {
+                // Change the postcode of a suburb
                 suburbs = suburbs.map((x) => {
                     if (x.suburb === suburb) {
                         return { suburb, postcode };
@@ -68,6 +70,9 @@
             }
             const searchSuburb = (suburb) => {
                 return suburbs.find(x => x.suburb === suburb).postcode;
+            }
+            const doesSuburbExist = (suburb) => {
+                return suburbs.find(x => x.suburb === suburb) !== undefined;
             }
             
             const suburbDisplay = document.getElementById('suburb-list');
@@ -88,10 +93,7 @@
             }
             displaySuburbList();
             const getSelectedSuburb = () => {
-                return Array.from(suburbDisplay.childNodes).find(suburb => suburb.selected);
-            }
-            const doesSuburbExist = (suburb) => {
-                return Array.from(suburbDisplay.childNodes).find(x => x.value === suburb) !== undefined;
+                return Array.from(suburbDisplay.children).find(suburb => suburb.selected);
             }
             
             document.getElementById('add-button').addEventListener('click', () => {
@@ -128,12 +130,12 @@
 
             const searchInput = document.getElementById('search-input');
             document.getElementById('search-button').addEventListener('click', () => {
-                if (!doesSuburbExist(suburbInput.value)) {
+                if (!doesSuburbExist(searchInput.value)) {
                     alert('Suburb does not exist in database');
                     return;
                 }
 
-                alert('Postcode: ' + searchSuburb(suburbInput.value));
+                alert('Postcode: ' + searchSuburb(searchInput.value));
             });
         </script>
     </body>

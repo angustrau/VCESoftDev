@@ -31,14 +31,15 @@
         </div> 
         <script>
             var container = document.getElementById('container');
-
+            
             document.getElementById('add').addEventListener('click', () => {
+                // When the add button is clicked, add a new calculator iframe
                 var iframe = document.createElement('iframe');
                 iframe.setAttribute('src', 'calculator.html');
                 container.appendChild(iframe);
-                console.log('hello')
             });
             document.getElementById('remove').addEventListener('click', () => {
+                // When the remove button is clicked, remove the latest calculator iframe
                 container.children[container.children.length - 1].remove();
             });
         </script>
