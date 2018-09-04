@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>Unit Converter</title>
+    </head>
+    <body>
+        <div id="root">
+            <h1>Unit Converter</h1>
+            <div id="content">
+                <div id="leftPane">
+                    <input type="number" id="input" value="0" />
+                </div>
+                <div id="middlePane">
+                    <div>
+                        <div>
+                            <input type="radio" id="FtC" name="unit" checked />
+                            <label for="FtC">Farenheit to Celcius</label>
+                        </div>
+                        <div>
+                            <input type="radio" id="CtF" name="unit" />
+                            <label for="CtF">Celcius to Farenheit</label>
+                        </div>
+                        <div>
+                            <input type="radio" id="INtCM" name="unit" />
+                            <label for="INtCM">Inches to Centimetres</label>
+                        </div>
+                        <div>
+                            <input type="radio" id="CMtIN" name="unit" />
+                            <label for="CMtIN">Centimetres to Inches</label>
+                        </div>
+                        <div>
+                            <input type="radio" id="OZtG" name="unit" />
+                            <label for="OZtG">Ounces to Grams</label>
+                        </div>
+                        <div>
+                            <input type="radio" id="GtOZ" name="unit" />
+                            <label for="GtOZ">Grams to Ounces</label>
+                        </div>
+                        <div>
+                            <input type="radio" id="currency" name="unit" />
+                            <label for="currency">Currency - multiplier: </label>
+                            <input type="number" id="currencymul" value="1" />
+                        </div>
+                    </div> 
+
+                    <button id="convert">Convert</button>
+                </div>
+                <div id="rightPane">
+                    <input type="number" id="output" disabled />
+                </div>
+            </div>
+        </div>
+
+        <style>
+            h1 {
+                text-align: center;
+            }
+
+            #content {
+                display: flex;
+                flex-direction: row;
+            }
+
+            #leftPane, #middlePane, #rightPane {
+                flex: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-direction: column;
+                border: 1px;
+                border-color: black;
+                border-style: solid;
+            }
+        </style>
+
+        <script>
+            const input = document.getElementById('input');
+            const output = document.getElementById('output');
+            const convert = document.getElementById('convert');
+
+            const FtC = document.getElementById('FtC');
+            const CtF = document.getElementById('CtF');
+            const INtCM = document.getElementById('INtCM');
+            const CMtIN = document.getElementById('CMtIN');
+            const OZtG = document.getElementById('OZtG');
+            const GtOZ = document.getElementById('GtOZ');
+            const currency = document.getElementById('currency');
+            const currencyMul = document.getElementById('currencymul');
+
+            convert.addEventListener('click', () => {
+                input.value = input.value || 0;
+                const inVal = input.value;
+                let outVal = 0;
+                switch (true) {
+                    case FtC.checked:
+                        outVal = (inVal - 32) * (5 / 9);
+                        break;
+                    case CtF.checked:
+                        outVal = (inVal * (9 / 5)) + 32;
+                        break;
+                    case INtCM.checked:
+                        outVal = inVal * 2.54;
+                        break;
+                    case CMtIN.checked:
+                        outVal = inVal / 2.54;
+                        break;
+                    case OZtG.checked:
+                        outVal = inVal * 28.35;
+                        break;
+                    case GtOZ.checked:
+                        outVal = inVal / 28.35;
+                        break; 
+                    case currency.checked:
+                        outVal = inVal * currencyMul.value 
+                    default:
+                        break;
+                }
+                output.value = outVal.toFixed(2);
+            });
+        </script>
+    </body>
+</html>
